@@ -31,20 +31,38 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             String chatId = update.getMessage().getChatId().toString();
-            String username = update.getMessage().getFrom().getUserName();
-            if (username == null || username.isEmpty()) {
-                username = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
-            }
+
             switch (messageText) {
                 case "/start":
-                    userService.registerUser(chatId, username);
-                    sendMessage(chatId, "Вы успешно зарегистрированы!");
+                    // Логика регистрации пользователя
                     break;
                 case "/pick":
-                    pickBeautyOfTheDay(chatId);
+                    // Логика выбора красавчика дня
+                    break;
+                case "/stats":
+                    showParticipantsStats(chatId);
                     break;
             }
         }
+    }
+
+    private void showParticipantsStats(String chatId) {
+        List<User> users = userService.findAllUsers();
+        if (users.isEmpty()) {
+            sendMessage(chatId, "Пока нет зарегистрированных участников.");
+            return;
+        }
+
+        StringBuilder message = new StringBuilder("Статистика участников:\n");
+        for (User user : users) {
+            message.append("@")
+                    .append(user.getUsername() != null ? user.getUsername() : "аноним")
+                    .append(" - Красавчик дня ")
+                    .append(user.getBeautyCount())
+                    .append(" раз(а)\n");
+        }
+
+        sendMessage(chatId, message.toString());
     }
 
     private void pickBeautyOfTheDay(String chatId) {
