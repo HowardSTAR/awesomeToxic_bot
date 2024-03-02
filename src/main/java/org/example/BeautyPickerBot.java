@@ -31,13 +31,17 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             String chatId = update.getMessage().getChatId().toString();
-
+            String username = update.getMessage().getFrom().getUserName();
+            if (username == null || username.isEmpty()) {
+                username = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
+            }
             switch (messageText) {
                 case "/start":
-                    // Логика регистрации пользователя
+                    userService.registerUser(chatId, username);
+                    sendMessage(chatId, "Вы успешно зарегистрированы!");
                     break;
                 case "/pick":
-                    // Логика выбора красавчика дня
+                    pickBeautyOfTheDay(chatId);
                     break;
                 case "/stats":
                     showParticipantsStats(chatId);
