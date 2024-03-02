@@ -9,12 +9,13 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
+    private final DailyPickRepository dailyPickRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, DailyPickRepository dailyPickRepository) {
         this.userRepository = userRepository;
+        this.dailyPickRepository = dailyPickRepository;
     }
 
     @Transactional(readOnly = true)

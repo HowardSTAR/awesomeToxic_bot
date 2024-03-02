@@ -20,10 +20,12 @@ public class BeautyPickerApplication {
     }
 
     @Bean
-    public BeautyPickerBot beautyPickerBot(UserService userService,
+    public BeautyPickerBot beautyPickerBot(UserRepository userRepository,
+                                           DailyPickRepository dailyPickRepository,
+                                           UserService userService,
                                            @Value("${bot.username}") String botUsername,
                                            @Value("${bot.token}") String botToken) {
-        BeautyPickerBot bot = new BeautyPickerBot(userService, botUsername, botToken);
+        BeautyPickerBot bot = new BeautyPickerBot(userRepository, dailyPickRepository, userService, botUsername, botToken);
         try {
             telegramBotsApi().registerBot(bot);
         } catch (Exception e) {
