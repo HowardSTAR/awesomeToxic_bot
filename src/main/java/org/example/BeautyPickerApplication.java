@@ -1,5 +1,10 @@
 package org.example;
 
+import org.example.repository.DailyPickRepository;
+import org.example.repository.UserRepository;
+import org.example.service.DailyPickService;
+import org.example.service.UserService;
+import org.example.util.BeautyPickerBot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,10 +27,11 @@ public class BeautyPickerApplication {
     @Bean
     public BeautyPickerBot beautyPickerBot(UserRepository userRepository,
                                            DailyPickRepository dailyPickRepository,
-                                           UserService userService,
+                                           UserService userService, DailyPickService dailyPickService,
                                            @Value("${bot.username}") String botUsername,
                                            @Value("${bot.token}") String botToken) {
-        BeautyPickerBot bot = new BeautyPickerBot(userRepository, dailyPickRepository, userService, botUsername, botToken);
+        BeautyPickerBot bot = new BeautyPickerBot(userRepository, dailyPickRepository,
+                userService, dailyPickService, botUsername, botToken);
         try {
             telegramBotsApi().registerBot(bot);
         } catch (Exception e) {

@@ -1,5 +1,9 @@
-package org.example;
+package org.example.util;
 
+import org.example.repository.DailyPickRepository;
+import org.example.repository.UserRepository;
+import org.example.service.DailyPickService;
+import org.example.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -9,7 +13,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -18,6 +21,7 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
     private final DailyPickRepository dailyPickRepository;
 
     private final UserService userService;
+    private final DailyPickService dailyPickService;
 
     @Value("${bot.username}")
     private String botUsername;
@@ -25,10 +29,13 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
     @Value("${bot.token}")
     private String botToken;
 
-    public BeautyPickerBot(UserRepository userRepository, DailyPickRepository dailyPickRepository, UserService userService, String botUsername, String botToken) {
+    public BeautyPickerBot(UserRepository userRepository, DailyPickRepository dailyPickRepository,
+                           UserService userService, DailyPickService dailyPickService,
+                           String botUsername, String botToken) {
         this.userRepository = userRepository;
         this.dailyPickRepository = dailyPickRepository;
         this.userService = userService;
+        this.dailyPickService = dailyPickService;
         this.botUsername = botUsername;
         this.botToken = botToken;
     }
@@ -44,8 +51,7 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
             }
             switch (messageText) {
                 case "/start":
-                    userService.registerUser(chatId, username);
-                    sendMessage(chatId, "Вы успешно зарегистрированы!");
+                    registerOrNotifyUser(chatId, username);
                     break;
                 case "/pick":
                     pickBeautyOfTheDay(chatId);
@@ -53,8 +59,21 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
                 case "/stats":
                     showParticipantsStats(chatId);
                     break;
+                case "/resetStats":
+                    dailyPickService.resetStatistics();
+                    sendMessage(chatId, "Статистика успешно сброшена.");
+                    break;
             }
         }
+    }
+
+    private void registerOrNotifyUser(String chatId, String userName) {
+        userService.findByChatId(chatId).ifPresentOrElse(user -> {
+            sendMessage(chatId, "Вы уже в игре.");
+        }, () -> {
+            userService.registerUser(chatId);
+            sendMessage(chatId, "Отлично, у нас новенький.");
+        });
     }
 
     private void showParticipantsStats(String chatId) {
@@ -88,42 +107,28 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
     }
 
     private void pickBeautyOfTheDay(String chatId) {
-        Optional<User> optionalUser = userService.findByChatId(chatId);
         LocalDate today = LocalDate.now();
-        if (dailyPickRepository.existsByChatIdAndPickDate(chatId, today)) {
+        boolean alreadyPicked = dailyPickRepository.existsByChatIdAndPickDate(chatId, today);
+        if (alreadyPicked) {
             sendMessage(chatId, "Красавчик дня уже был выбран сегодня.");
             return;
         }
 
-        if (!optionalUser.isPresent()) {
+        List<User> users = userService.findAllUsersByChatId(chatId);
+        if (users.isEmpty()) {
             sendMessage(chatId, "Пожалуйста, зарегистрируйтесь, используя команду /start.");
             return;
         }
 
-        List<User> users = userService.findAllUsers();
-        if (users.isEmpty()) {
-            sendMessage(chatId, "В чате пока нет зарегистрированных пользователей.");
-            return;
-        }
-
-        Random random = new Random();
-        int index = random.nextInt(users.size());
-        User beauty = users.get(index);
-        // Сохранение выбора красавчика дня в базе данных
+        Random rand = new Random();
+        User beauty = users.get(rand.nextInt(users.size()));
         DailyPick pick = new DailyPick();
         pick.setChatId(chatId);
-        pick.setUserId(beauty.getId()); // ID выбранного пользователя
+        pick.setUserId(beauty.getId());
         pick.setPickDate(today);
         dailyPickRepository.save(pick);
 
         sendMessage(chatId, "Красавчик дня: @" + beauty.getUsername());
-        if (beauty.getUsername() == null) {
-            sendMessage(chatId, "К сожалению, у красавчика дня нет никнейма в Telegram.");
-        } else {
-            sendMessage(chatId, "Красавчик дня: @" + beauty.getUsername());
-        }
-        userService.incrementBeautyCount(beauty.getChatId());
-
     }
 
     private void sendMessage(String chatId, String text) {

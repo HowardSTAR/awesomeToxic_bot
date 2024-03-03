@@ -1,12 +1,11 @@
-package org.example;
+package org.example.util;
 
-import org.springframework.data.annotation.Id;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "daily_picks")
+@Table(name = "public.daily_picks")
 public class DailyPick {
 
     @Id

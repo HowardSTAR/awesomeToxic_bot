@@ -1,5 +1,8 @@
-package org.example;
+package org.example.service;
 
+import org.example.repository.DailyPickRepository;
+import org.example.util.User;
+import org.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,22 +26,14 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    @Transactional
-    public void incrementBeautyCount(String chatId) {
-        Optional<User> optionalUser = userRepository.findByChatId(chatId);
-        User user = optionalUser.orElseGet(() -> new User(chatId));
-        user.setBeautyCount(user.getBeautyCount() + 1);
-        userRepository.save(user);
-    }
-
-    public void registerUser(String chatId, String username) {
-        Optional<User> optionalUser = userRepository.findByChatId(chatId);
-        if (!optionalUser.isPresent()) {
-            User newUser = new User();
-            newUser.setChatId(chatId);
-            newUser.setUsername(username);
+    public void registerUser(String chatId) {
+        userRepository.findByChatId(chatId).ifPresentOrElse(user -> {
+            // Пользователь найден, можно отправить сообщение о том, что он уже зарегистрирован
+        }, () -> {
+            // Пользователь не найден, регистрируем нового
+            User newUser = new User(chatId);
             userRepository.save(newUser);
-        }
+        });
     }
 
     public Optional<User> findByChatId(String chatId) {
