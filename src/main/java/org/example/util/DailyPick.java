@@ -1,10 +1,15 @@
 package org.example.util;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "public.daily_picks")
 public class DailyPick {
 
@@ -21,39 +26,6 @@ public class DailyPick {
     @Column(name = "pick_date")
     private LocalDate pickDate;
 
-    // Конструкторы
+    // Конструктор
     public DailyPick() {}
-
-    // Геттеры и сеттеры
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getChatId() {
-        return chatId;
-    }
-
-    public void setChatId(String chatId) {
-        this.chatId = chatId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public LocalDate getPickDate() {
-        return pickDate;
-    }
-
-    public void setPickDate(LocalDate pickDate) {
-        this.pickDate = pickDate;
-    }
 }

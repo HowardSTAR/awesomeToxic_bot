@@ -53,8 +53,4 @@ public class UserService {
     public User save(User user) {
         return userRepository.save(user);
     }
-
-    public boolean isUserRegistered(String chatId) {
-        return userRepository.findByChatId(chatId).isPresent();
-    }
 }

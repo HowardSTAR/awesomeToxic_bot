@@ -36,8 +36,4 @@ public class DailyPickService {
         dailyPick.setPickDate(LocalDate.now());
         dailyPickRepository.save(dailyPick);
     }
-
-    public List<DailyPick> getStatistics() {
-        return dailyPickRepository.findAll();
-    }
 }

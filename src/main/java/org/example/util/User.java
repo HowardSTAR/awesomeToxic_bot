@@ -17,8 +17,8 @@ public class User {
     @Column
     private String chatId; // ID чата в Telegram
 
-//    @Column(unique = true)
-//    private String userId; // ID пользователя в Telegram
+    @Column
+    private String userId; // ID пользователя в Telegram
 
     private String username; // Никнейм пользователя
 
