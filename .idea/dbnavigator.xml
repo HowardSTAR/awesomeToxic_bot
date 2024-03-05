@@ -37,6 +37,9 @@
       </filter>
     </filter-actions>
   </component>
+  <component name="DBNavigator.Project.FileConnectionMappingManager">
+    <mapping file-url="file://$PROJECT_DIR$/src/main/resources/users.sql" connection-id="e339fadb-ff9a-43fb-aa59-9a48e07d5a29" session-id="MAIN" current-schema="postgres" />
+  </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
     <filters />
@@ -532,5 +535,9 @@
         </visibility-settings>
       </environment>
     </general-settings>
+  </component>
+  <component name="DBNavigator.Project.StatementExecutionManager">
+    <execution-variables />
+    <execution-variable-types />
   </component>
 </project>
