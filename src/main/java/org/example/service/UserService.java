@@ -26,6 +26,12 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
+    public void deleteAllUsers() {
+        userRepository.deleteAll();
+    }
+
+
     public void registerUser(String chatId) {
         userRepository.findByChatId(chatId).ifPresentOrElse(user -> {
             // Пользователь найден, можно отправить сообщение о том, что он уже зарегистрирован
@@ -36,11 +42,19 @@ public class UserService {
         });
     }
 
-    public Optional<User> findByChatId(String chatId) {
-        return userRepository.findByChatId(chatId);
+    public List<User> findAllUsersByChatId(String chatId) {
+        return userRepository.findAllByChatId(chatId);
+    }
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
     }
 
     public boolean isUserRegistered(String chatId) {
-        return userRepository.findByChatId(chatId) != null;
+        return userRepository.findByChatId(chatId).isPresent();
     }
 }
