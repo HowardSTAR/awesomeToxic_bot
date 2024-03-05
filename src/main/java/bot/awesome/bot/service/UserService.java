@@ -15,10 +15,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final DailyPickRepository dailyPickRepository;
 
+    private final DailyPickService dailyPickService;
+
     @Autowired
-    public UserService(UserRepository userRepository, DailyPickRepository dailyPickRepository) {
+    public UserService(UserRepository userRepository, DailyPickRepository dailyPickRepository, DailyPickService dailyPickService) {
         this.userRepository = userRepository;
         this.dailyPickRepository = dailyPickRepository;
+        this.dailyPickService = dailyPickService;
     }
 
     @Transactional(readOnly = true)
@@ -28,6 +31,7 @@ public class UserService {
 
     @Transactional
     public void deleteAllUsers() {
+        dailyPickService.resetStatistics();
         userRepository.deleteAll();
     }
 

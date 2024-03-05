@@ -149,18 +149,18 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         LocalDate today = LocalDate.now();
         List<User> users = userService.findAllUsersByChatId(chatId);
         if (users.isEmpty()) {
-            sendMessage(username, "Пожалуйста, зарегистрируйтесь, используя команду /start.");
+            sendMessage(chatId, "Пожалуйста, зарегистрируйтесь, используя команду /start.");
             return;
         }
+        boolean alreadyPicked = dailyPickRepository.existsByChatIdAndPickDate(chatId, today);
+        if (alreadyPicked) {
+            // TODO доделать при повторном выборе вывести кто сейчас красавчик
+            sendMessage(chatId, "Красавчик дня уже был выбран сегодня.");
+            return;
+        }
+
         Random rand = new Random();
         User beauty = users.get(rand.nextInt(users.size()));
-        boolean alreadyPicked = dailyPickRepository.existsByChatIdAndPickDate(chatId, today);
-
-        if (alreadyPicked) {
-            sendMessage(chatId, "Красавчик дня уже был выбран сегодня.\nЭто у нас: ");
-            return;
-        }
-
         DailyPick pick = new DailyPick();
         pick.setChatId(chatId);
         pick.setUserId(beauty.getId());
