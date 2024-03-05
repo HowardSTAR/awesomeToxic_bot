@@ -13,14 +13,11 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final DailyPickRepository dailyPickRepository;
-
     private final DailyPickService dailyPickService;
 
     @Autowired
-    public UserService(UserRepository userRepository, DailyPickRepository dailyPickRepository, DailyPickService dailyPickService) {
+    public UserService(UserRepository userRepository, DailyPickService dailyPickService) {
         this.userRepository = userRepository;
-        this.dailyPickRepository = dailyPickRepository;
         this.dailyPickService = dailyPickService;
     }
 
