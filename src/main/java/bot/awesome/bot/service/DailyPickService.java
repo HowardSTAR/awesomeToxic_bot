@@ -1,14 +1,13 @@
-package org.example.service;
+package bot.awesome.bot.service;
 
-import org.example.util.DailyPick;
-import org.example.repository.DailyPickRepository;
-import org.example.repository.UserRepository;
+import bot.awesome.bot.repository.DailyPickRepository;
+import bot.awesome.bot.repository.UserRepository;
+import bot.awesome.bot.util.DailyPick;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 public class DailyPickService {

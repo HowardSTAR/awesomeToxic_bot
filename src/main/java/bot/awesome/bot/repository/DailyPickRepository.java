@@ -1,6 +1,6 @@
-package org.example.repository;
+package bot.awesome.bot.repository;
 
-import org.example.util.DailyPick;
+import bot.awesome.bot.util.DailyPick;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;

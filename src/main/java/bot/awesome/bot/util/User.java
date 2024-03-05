@@ -1,4 +1,4 @@
-package org.example.util;
+package bot.awesome.bot.util;
 
 import lombok.Getter;
 import lombok.Setter;

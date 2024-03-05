@@ -1,10 +1,10 @@
-package org.example;
+package bot.awesome.bot;
 
-import org.example.repository.DailyPickRepository;
-import org.example.repository.UserRepository;
-import org.example.service.DailyPickService;
-import org.example.service.UserService;
-import org.example.util.BeautyPickerBot;
+import bot.awesome.bot.util.BeautyPickerBot;
+import bot.awesome.bot.repository.DailyPickRepository;
+import bot.awesome.bot.repository.UserRepository;
+import bot.awesome.bot.service.DailyPickService;
+import bot.awesome.bot.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

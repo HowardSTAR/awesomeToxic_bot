@@ -1,8 +1,8 @@
-package org.example.service;
+package bot.awesome.bot.service;
 
-import org.example.repository.DailyPickRepository;
-import org.example.util.User;
-import org.example.repository.UserRepository;
+import bot.awesome.bot.repository.DailyPickRepository;
+import bot.awesome.bot.util.User;
+import bot.awesome.bot.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

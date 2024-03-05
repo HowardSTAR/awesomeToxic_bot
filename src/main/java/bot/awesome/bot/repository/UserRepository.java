@@ -1,6 +1,6 @@
-package org.example.repository;
+package bot.awesome.bot.repository;
 
-import org.example.util.User;
+import bot.awesome.bot.util.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

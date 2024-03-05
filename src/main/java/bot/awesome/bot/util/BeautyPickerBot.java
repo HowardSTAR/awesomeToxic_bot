@@ -1,9 +1,9 @@
-package org.example.util;
+package bot.awesome.bot.util;
 
-import org.example.repository.DailyPickRepository;
-import org.example.repository.UserRepository;
-import org.example.service.DailyPickService;
-import org.example.service.UserService;
+import bot.awesome.bot.repository.DailyPickRepository;
+import bot.awesome.bot.repository.UserRepository;
+import bot.awesome.bot.service.DailyPickService;
+import bot.awesome.bot.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
