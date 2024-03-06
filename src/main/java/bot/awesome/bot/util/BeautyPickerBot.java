@@ -7,6 +7,7 @@ import bot.awesome.bot.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -42,6 +43,52 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         this.botToken = botToken;
     }
 
+//    @Override
+//    public void onUpdateReceived(Update update) {
+//        if (update.hasCallbackQuery()) {
+////            String callData = update.getCallbackQuery().getData();
+//            String messageText = update.getMessage().getText();
+//            String chatId = update.getMessage().getChatId().toString();
+//            String userId = update.getMessage().getFrom().getId().toString();
+//            String username = update.getMessage().getFrom().getUserName();
+//            if (username == null || username.isEmpty()) {
+//                username = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
+//            }
+//            switch (messageText) {
+//                case "/reg":
+//                    registerOrNotifyUser(chatId, userId, username);
+//                    break;
+//                case "/game":
+//                    pickBeautyOfTheDay(chatId);
+//                    break;
+//                case "/stat":
+//                    showParticipantsStats(chatId);
+//                    break;
+//                case "/resetStats":
+//                    dailyPickService.resetStatistics(chatId);
+//                    sendMessage(chatId, "Статистика успешно сброшена.");
+//                    break;
+//                case "/ss":
+//                    // вывод всех учатников
+//                    showParticipants(chatId);
+//                    break;
+//                case "/deleteAll":
+///*
+//                     TODO
+//                    if (isAdmin(chatId)) { // Предполагается, что вы проверяете, является ли пользователь администратором
+//*/
+//                    dailyPickService.resetStatistics(chatId);
+//                    userService.deleteAllUsers(chatId);
+//                    sendMessage(chatId, "Все пользователи удалены.");
+///*
+//                    } else {
+//                        sendMessage(chatId, "У вас нет прав для выполнения этой команды.");
+//                    }
+//*/
+//                    break;
+//            }
+//        }
+//    }
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -62,13 +109,13 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
                 case "/stat":
                     showParticipantsStats(chatId);
                     break;
+                case "/allPlayers":
+                    // вывод всех учатников
+                    showParticipants(chatId);
+                    break;
                 case "/resetStats":
                     dailyPickService.resetStatistics(chatId);
                     sendMessage(chatId, "Статистика успешно сброшена.");
-                    break;
-                case "/ss":
-                    // вывод всех учатников
-                    showParticipants(chatId);
                     break;
                 case "/deleteAll":
 /*
@@ -84,6 +131,33 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
                     }
 */
                     break;
+            }
+        }
+
+        if (update.hasCallbackQuery()) {
+            // Получаем данные из CallbackQuery
+            String callbackData = update.getCallbackQuery().getData();
+            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            String userId = update.getCallbackQuery().getFrom().getId().toString();
+            String username = update.getCallbackQuery().getFrom().getUserName();
+
+            // Обработка CallbackQuery
+            if ("/reg".equals(callbackData)) {
+                registerOrNotifyUser(chatId, userId, username);
+            } else if ("/stat".equals(callbackData)) {
+                showParticipantsStats(chatId);
+            } else if ("/game".equals(callbackData)) {
+                pickBeautyOfTheDay(chatId);
+            } else if ("/allPlayers".equals(callbackData)) {
+                showParticipants(chatId);
+            }
+
+            // Удаление исходного сообщения с клавиатурой, если требуется
+            try {
+                execute(new DeleteMessage(chatId, messageId));
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -105,7 +179,7 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
     private void sendCommandButtons(String chatId) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText("Dddd");
+        message.setText("Во что сыграем?");
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
@@ -113,12 +187,12 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         List<InlineKeyboardButton> row1 = new ArrayList<>();
 
         InlineKeyboardButton reg = new InlineKeyboardButton();
-        reg.setText("Reg");
+        reg.setText("Регистрация ✍\uFE0F");
         reg.setCallbackData("/reg");
         row1.add(reg);
 
         InlineKeyboardButton stat = new InlineKeyboardButton();
-        stat.setText("Stat");
+        stat.setText("Статистика \uD83D\uDCC8");
         stat.setCallbackData("/stat");
         row1.add(stat);
         keyboard.add(row1);
@@ -126,44 +200,18 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         List<InlineKeyboardButton> row2 = new ArrayList<>();
 
         InlineKeyboardButton game = new InlineKeyboardButton();
-        game.setText("Game");
+        game.setText("Красавчик \uD83D\uDE0E");
         game.setCallbackData("/game");
         row2.add(game);
 
+        InlineKeyboardButton allPlayers = new InlineKeyboardButton();
+        allPlayers.setText("Участники \uD83D\uDC6B");
+        allPlayers.setCallbackData("/allPlayers");
+        row2.add(allPlayers);
+        keyboard.add(row2);
+
         inlineKeyboardMarkup.setKeyboard(keyboard);
         message.setReplyMarkup(inlineKeyboardMarkup);
-
-//        // Создаем клавиатуру
-//        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-//        List<KeyboardRow> keyboard = new ArrayList<>();
-//
-//        // Добавляем кнопки
-//        KeyboardRow row = new KeyboardRow();
-//        row.add("Регистрация");
-//        row.add("Выбор Красавчка");
-//        keyboard.add(row);
-//
-//        row = new KeyboardRow();
-//        row.add("Стастистика");
-////        row.add("/resetStats");
-//        keyboard.add(row);
-//
-//        /**
-//         * для тестирования
-//         */
-///*
-//        row = new KeyboardRow();
-//        row.add("/deleteAll");
-//        keyboard.add(row);
-//*/
-//
-//        // Настройки клавиатуры
-//        keyboardMarkup.setKeyboard(keyboard);
-//        keyboardMarkup.setResizeKeyboard(true);
-//        keyboardMarkup.setOneTimeKeyboard(true);
-//
-//        message.setReplyMarkup(keyboardMarkup);
-
         try {
             execute(message); // Отправляем сообщение с клавиатурой
         } catch (TelegramApiException e) {
