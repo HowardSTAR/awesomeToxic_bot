@@ -9,8 +9,8 @@ import java.util.Optional;
 
 public interface DailyPickRepository extends JpaRepository<DailyPick, Long> {
     // Методы для работы с данными, например, проверка существования записи для чата и даты
-    boolean existsByChatIdAndPickDate(String username, LocalDate pickDate);
     List<DailyPick> findByChatId(String chatId);
-    // TODO на считывание с таблицы кто сейчас красавчик дня
-    Optional<DailyPick> findByChatIdAndPickDate(String chatId, LocalDate date);
+    List<DailyPick> findByChatIdAndPickDate(String chatId, LocalDate date);
+    boolean existsByChatIdAndPickDate(String username, LocalDate pickDate);
+    void deleteStatByChatId(String chatId);
 }

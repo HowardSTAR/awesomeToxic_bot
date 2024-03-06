@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -45,31 +47,37 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             String chatId = update.getMessage().getChatId().toString();
+            String userId = update.getMessage().getFrom().getId().toString();
             String username = update.getMessage().getFrom().getUserName();
             if (username == null || username.isEmpty()) {
                 username = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
             }
             switch (messageText) {
-                case "/start":
-                    registerOrNotifyUser(chatId, username);
+                case "/reg":
+                    registerOrNotifyUser(chatId, userId, username);
                     break;
-                case "/pick":
-                    pickBeautyOfTheDay(chatId, username);
+                case "/game":
+                    pickBeautyOfTheDay(chatId);
                     break;
-                case "/stats":
+                case "/stat":
                     showParticipantsStats(chatId);
                     break;
                 case "/resetStats":
-                    dailyPickService.resetStatistics();
+                    dailyPickService.resetStatistics(chatId);
                     sendMessage(chatId, "Статистика успешно сброшена.");
+                    break;
+                case "/ss":
+                    // вывод всех учатников
+                    showParticipants(chatId);
                     break;
                 case "/deleteAll":
 /*
                      TODO
                     if (isAdmin(chatId)) { // Предполагается, что вы проверяете, является ли пользователь администратором
 */
-                        userService.deleteAllUsers();
-                        sendMessage(chatId, "Все пользователи удалены.");
+                    dailyPickService.resetStatistics(chatId);
+                    userService.deleteAllUsers(chatId);
+                    sendMessage(chatId, "Все пользователи удалены.");
 /*
                     } else {
                         sendMessage(chatId, "У вас нет прав для выполнения этой команды.");
@@ -80,41 +88,102 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendCommandButtons() {
-        // Создаем клавиатуру
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        // Добавляем кнопки
-        KeyboardRow row = new KeyboardRow();
-        row.add("/start");
-        row.add("/pick");
-        // Добавляем строку кнопок в клавиатуру
-        keyboard.add(row);
-
-        // Добавляем еще кнопки по необходимости
-        row = new KeyboardRow();
-        row.add("/stats");
-        row.add("/resetStats");
-        keyboard.add(row);
-
-        // Настройки клавиатуры
-        keyboardMarkup.setKeyboard(keyboard);
-        keyboardMarkup.setResizeKeyboard(true);
-        keyboardMarkup.setOneTimeKeyboard(true); // Сделать клавиатуру одноразовой, если нужно
+    public void showParticipants(String chatId) {
+        // Предполагается, что этот метод возвращает список пользователей для данного chatId
+        List<User> users = userService.getUsersByChatId(chatId);
+        if (users.isEmpty()) {
+            sendMessage(chatId, "В этом чате пока нет участников.");
+        } else {
+            StringBuilder messageText = new StringBuilder("Участники в этом чате:\n");
+            for (User user : users) {
+                messageText.append(user.getUsername()).append("\n");
+            }
+            sendMessage(chatId, messageText.toString());
+        }
     }
 
-    private void registerOrNotifyUser(String chatId, String username) {
-        userService.findByUsername(username).ifPresentOrElse(user -> {
+    private void sendCommandButtons(String chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("Dddd");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        // Adding buttons
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+
+        InlineKeyboardButton reg = new InlineKeyboardButton();
+        reg.setText("Reg");
+        reg.setCallbackData("/reg");
+        row1.add(reg);
+
+        InlineKeyboardButton stat = new InlineKeyboardButton();
+        stat.setText("Stat");
+        stat.setCallbackData("/stat");
+        row1.add(stat);
+        keyboard.add(row1);
+
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+
+        InlineKeyboardButton game = new InlineKeyboardButton();
+        game.setText("Game");
+        game.setCallbackData("/game");
+        row2.add(game);
+
+        inlineKeyboardMarkup.setKeyboard(keyboard);
+        message.setReplyMarkup(inlineKeyboardMarkup);
+
+//        // Создаем клавиатуру
+//        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+//        List<KeyboardRow> keyboard = new ArrayList<>();
+//
+//        // Добавляем кнопки
+//        KeyboardRow row = new KeyboardRow();
+//        row.add("Регистрация");
+//        row.add("Выбор Красавчка");
+//        keyboard.add(row);
+//
+//        row = new KeyboardRow();
+//        row.add("Стастистика");
+////        row.add("/resetStats");
+//        keyboard.add(row);
+//
+//        /**
+//         * для тестирования
+//         */
+///*
+//        row = new KeyboardRow();
+//        row.add("/deleteAll");
+//        keyboard.add(row);
+//*/
+//
+//        // Настройки клавиатуры
+//        keyboardMarkup.setKeyboard(keyboard);
+//        keyboardMarkup.setResizeKeyboard(true);
+//        keyboardMarkup.setOneTimeKeyboard(true);
+//
+//        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(message); // Отправляем сообщение с клавиатурой
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void registerOrNotifyUser(String chatId, String userId, String username) {
+        userService.findByChatIdAndUserId(chatId, userId).ifPresentOrElse(user -> {
             sendMessage(chatId, "Вы уже в игре.");
         }, () -> {
             User newUser = new User();
-            newUser.setChatId(chatId); // Сохраняем chatId для связи с пользователем в Telegram
-            newUser.setUsername(username); // Используем username как уникальный идентификатор
+            newUser.setChatId(chatId);
+            newUser.setUserId(userId);
+            newUser.setUsername(username); // Set the username as well
             userService.save(newUser);
             sendMessage(chatId, "Отлично, у нас новенький.");
         });
     }
+
     private void showParticipantsStats(String chatId) {
         List<User> users = userService.findAllUsers();
         List<DailyPick> picks = dailyPickRepository.findByChatId(chatId);
@@ -134,8 +203,7 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         userIdToCount.forEach((userId, count) -> {
             User user = userRepository.findById(userId).orElse(null);
             if (user != null) {
-                message.append("@")
-                        .append(user.getUsername())
+                message.append(user.getUsername())
                         .append(" - Красавчик дня ")
                         .append(count)
                         .append(" раз(а)\n");
@@ -145,7 +213,7 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         sendMessage(chatId, message.toString());
     }
 
-    private void pickBeautyOfTheDay(String chatId, String username) {
+    private void pickBeautyOfTheDay(String chatId) {
         LocalDate today = LocalDate.now();
         List<User> users = userService.findAllUsersByChatId(chatId);
         if (users.isEmpty()) {
@@ -153,12 +221,25 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
             return;
         }
         boolean alreadyPicked = dailyPickRepository.existsByChatIdAndPickDate(chatId, today);
+
         if (alreadyPicked) {
-            // TODO доделать при повторном выборе вывести кто сейчас красавчик
-            sendMessage(chatId, "Красавчик дня уже был выбран сегодня.");
+            List<DailyPick> dailyPicks = dailyPickRepository.findByChatIdAndPickDate(chatId, today);
+            if (!dailyPicks.isEmpty()) {
+                // Выбираем последнюю запись, если есть несколько
+                DailyPick lastPick = dailyPicks.get(dailyPicks.size() - 1);
+                Optional<User> user = userRepository.findById(lastPick.getUserId());
+                if (user.isPresent()) {
+                    String message = "Сегодня красавчика дня выбирали.\nИм стал: " + user.get().getUsername();
+                    sendMessage(chatId, message);
+                } else {
+                    sendMessage(chatId, "Не удалось найти пользователя для красавчика дня.");
+                }
+            } else {
+                sendMessage(chatId, "Сегодня красавчик дня не выбирался.");
+            }
+
             return;
         }
-
         Random rand = new Random();
         User beauty = users.get(rand.nextInt(users.size()));
         DailyPick pick = new DailyPick();
@@ -171,10 +252,10 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
     }
 
     private void sendMessage(String chatId, String text) {
-        sendCommandButtons();
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
+        sendCommandButtons(chatId);
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -188,7 +269,6 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         List<String> adminIds = Arrays.asList("12345", "67890"); // Пример ID администраторов
         return adminIds.contains(userId);
     }
-
 
     @Override
     public String getBotUsername() {

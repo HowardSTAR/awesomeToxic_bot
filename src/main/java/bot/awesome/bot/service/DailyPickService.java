@@ -22,9 +22,9 @@ public class DailyPickService {
     }
 
     @Transactional
-    public void resetStatistics() {
+    public void resetStatistics(String chatId) {
         // Полное удаление статистики выборов
-        dailyPickRepository.deleteAll();
+        dailyPickRepository.deleteStatByChatId(chatId);
     }
 
     @Transactional

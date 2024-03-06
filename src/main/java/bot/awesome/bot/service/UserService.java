@@ -13,11 +13,15 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final DailyPickRepository dailyPickRepository;
     private final DailyPickService dailyPickService;
 
     @Autowired
-    public UserService(UserRepository userRepository, DailyPickService dailyPickService) {
+    public UserService(UserRepository userRepository,
+                       DailyPickRepository dailyPickRepository,
+                       DailyPickService dailyPickService) {
         this.userRepository = userRepository;
+        this.dailyPickRepository = dailyPickRepository;
         this.dailyPickService = dailyPickService;
     }
 
@@ -27,11 +31,13 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteAllUsers() {
-        dailyPickService.resetStatistics();
-        userRepository.deleteAll();
+    public void deleteAllUsers(String chatId) {
+        userRepository.deleteByChatId(chatId);
     }
 
+    public List<User> getUsersByChatId(String chatId) {
+        return userRepository.findAllByChatId(chatId);
+    }
 
     public void registerUser(String chatId) {
         userRepository.findByChatId(chatId).ifPresentOrElse(user -> {
@@ -45,6 +51,10 @@ public class UserService {
 
     public List<User> findAllUsersByChatId(String chatId) {
         return userRepository.findAllByChatId(chatId);
+    }
+
+    public Optional<User> findByChatIdAndUserId(String chatId, String userId) {
+        return userRepository.findByChatIdAndUserId(chatId, userId);
     }
 
     public Optional<User> findByUsername(String username) {
