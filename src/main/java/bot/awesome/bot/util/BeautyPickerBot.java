@@ -100,13 +100,16 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
                 username = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
             }
             switch (messageText) {
+                case "/start":
+                    sendStartMessage(chatId);
+                    break;
                 case "/reg":
                     registerOrNotifyUser(chatId, userId, username);
                     break;
                 case "/game":
                     pickBeautyOfTheDay(chatId);
                     break;
-                case "/stat":
+                case "/stats":
                     showParticipantsStats(chatId);
                     break;
                 case "/allPlayers":
@@ -114,22 +117,21 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
                     showParticipants(chatId);
                     break;
                 case "/resetStats":
-                    dailyPickService.resetStatistics(chatId);
-                    sendMessage(chatId, "Статистика успешно сброшена.");
-                    break;
-                case "/deleteAll":
-/*
-                     TODO
-                    if (isAdmin(chatId)) { // Предполагается, что вы проверяете, является ли пользователь администратором
-*/
-                    dailyPickService.resetStatistics(chatId);
-                    userService.deleteAllUsers(chatId);
-                    sendMessage(chatId, "Все пользователи удалены.");
-/*
+                    if (isAdmin(userId)) {
+                        dailyPickService.resetStatistics(chatId);
+                        sendMessage(chatId, "Статистика успешно сброшена.");
                     } else {
                         sendMessage(chatId, "У вас нет прав для выполнения этой команды.");
                     }
-*/
+                    break;
+                case "/deleteAll":
+                    if (isAdmin(userId)) {
+                        dailyPickService.resetStatistics(chatId);
+                        userService.deleteAllUsers(chatId);
+                        sendMessage(chatId, "Все пользователи удалены.");
+                    } else {
+                        sendMessage(chatId, "У вас нет прав для выполнения этой команды.");
+                    }
                     break;
             }
         }
@@ -145,7 +147,7 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
             // Обработка CallbackQuery
             if ("/reg".equals(callbackData)) {
                 registerOrNotifyUser(chatId, userId, username);
-            } else if ("/stat".equals(callbackData)) {
+            } else if ("/stats".equals(callbackData)) {
                 showParticipantsStats(chatId);
             } else if ("/game".equals(callbackData)) {
                 pickBeautyOfTheDay(chatId);
@@ -159,6 +161,24 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void sendStartMessage(String chatId) {
+        String welcomeText = "Привет! Вот что я умею:\n\n" +
+                "🔹 /reg - регистрация в игре и начало участия.\n" +
+                "🔹 /game - выбор красавчика дня среди зарегистрированных участников.\n" +
+                "🔹 /stats - показ статистики по всем участникам.\n" +
+                "🔹 /allPlayers - увидеть всех участников.\n\n" +
+                "Выбери команду и давай начнем!";
+
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText(welcomeText);
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 
@@ -193,7 +213,7 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
 
         InlineKeyboardButton stat = new InlineKeyboardButton();
         stat.setText("Статистика \uD83D\uDCC8");
-        stat.setCallbackData("/stat");
+        stat.setCallbackData("/stats");
         row1.add(stat);
         keyboard.add(row1);
 
@@ -311,10 +331,9 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         }
     }
 
-    // TODO
     private boolean isAdmin(String userId) {
         // Предположим, что у вас есть список или массив ID администраторов
-        List<String> adminIds = Arrays.asList("12345", "67890"); // Пример ID администраторов
+        List<String> adminIds = Arrays.asList("2099386"); // Пример ID администраторов
         return adminIds.contains(userId);
     }
 
