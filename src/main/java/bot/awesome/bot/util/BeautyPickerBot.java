@@ -239,7 +239,7 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         LocalDate today = LocalDate.now();
         List<User> users = userService.findAllUsersByChatId(chatId);
         if (users.isEmpty()) {
-            sendMessage(chatId, "Пожалуйста, зарегистрируйтесь, используя команду /start.");
+            sendMessage(chatId, "Пожалуйста, зарегистрируйтесь, используя команду /reg.");
             return;
         }
         boolean alreadyPicked = dailyPickRepository.existsByChatIdAndPickDate(chatId, today);
