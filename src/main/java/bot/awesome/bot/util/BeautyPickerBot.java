@@ -43,52 +43,6 @@ public class BeautyPickerBot extends TelegramLongPollingBot {
         this.botToken = botToken;
     }
 
-//    @Override
-//    public void onUpdateReceived(Update update) {
-//        if (update.hasCallbackQuery()) {
-////            String callData = update.getCallbackQuery().getData();
-//            String messageText = update.getMessage().getText();
-//            String chatId = update.getMessage().getChatId().toString();
-//            String userId = update.getMessage().getFrom().getId().toString();
-//            String username = update.getMessage().getFrom().getUserName();
-//            if (username == null || username.isEmpty()) {
-//                username = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
-//            }
-//            switch (messageText) {
-//                case "/reg":
-//                    registerOrNotifyUser(chatId, userId, username);
-//                    break;
-//                case "/game":
-//                    pickBeautyOfTheDay(chatId);
-//                    break;
-//                case "/stat":
-//                    showParticipantsStats(chatId);
-//                    break;
-//                case "/resetStats":
-//                    dailyPickService.resetStatistics(chatId);
-//                    sendMessage(chatId, "Статистика успешно сброшена.");
-//                    break;
-//                case "/ss":
-//                    // вывод всех учатников
-//                    showParticipants(chatId);
-//                    break;
-//                case "/deleteAll":
-///*
-//                     TODO
-//                    if (isAdmin(chatId)) { // Предполагается, что вы проверяете, является ли пользователь администратором
-//*/
-//                    dailyPickService.resetStatistics(chatId);
-//                    userService.deleteAllUsers(chatId);
-//                    sendMessage(chatId, "Все пользователи удалены.");
-///*
-//                    } else {
-//                        sendMessage(chatId, "У вас нет прав для выполнения этой команды.");
-//                    }
-//*/
-//                    break;
-//            }
-//        }
-//    }
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
